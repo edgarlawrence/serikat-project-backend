@@ -1,8 +1,5 @@
 const db = require('../config/index');
 const Sequelize = require('sequelize');
-const { v4: uuidv4 } = require("uuid");
-require('dotenv').config()
-console.log(process.env)
 
 const DataTypes = Sequelize;
 
@@ -127,46 +124,23 @@ const Contribution = db.define('contributions', {
     }
 })
 
-const User = db.define("users", {
-    username: {
-      type: Sequelize.STRING
+const Users = db.define('users',{
+    username:{
+        type: DataTypes.STRING
     },
-    email: {
-      type: Sequelize.STRING
+    email:{
+        type: DataTypes.STRING
     },
-    password: {
-      type: Sequelize.STRING
+    password:{
+        type: DataTypes.STRING
+    },
+    refresh_token:{
+        type: DataTypes.TEXT
     }
-  });
+},{
+    freezeTableName:true
+});
 
-  const RefreshToken = db.define("refreshToken", {
-    token: {
-      type: Sequelize.STRING,
-    },
-    expiryDate: {
-      type: Sequelize.DATE,
-    },
-  });  
-
-  RefreshToken.createToken = async function (user) {
-    let expiredAt = new Date();
-
-    expiredAt.setSeconds(expiredAt.getSeconds() + "60");
-
-    let _token = uuidv4();
-
-    let refreshToken = await this.create({
-      token: _token,
-      userId: user.id,
-      expiryDate: expiredAt.getTime(),
-    });
-
-    return refreshToken.token;
-  };
-
-  RefreshToken.verifyExpiration = (token) => {
-    return token.expiryDate.getTime() < new Date().getTime();
-  };
 
 // Tables.hasOne(CategoryTables, {
 //     foreignKey: {
@@ -198,14 +172,6 @@ ReasonCategory.belongsTo(ComplainTables, {
     }
 })
 
-RefreshToken.belongsTo(User, {
-    foreignKey: 'userId', targetKey: 'id'
-  });
-
-User.hasOne(RefreshToken, {
-    foreignKey: 'userId', targetKey: 'id'
-  });
-
 db.sync()
 
-module.exports = { Tables, CategoryTables, MemberTable, User, RefreshToken }
+module.exports = { Tables, CategoryTables, MemberTable, Users }

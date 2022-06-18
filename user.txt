@@ -1,5 +1,8 @@
 username:
 adminspn123
 
+email
+spnadmin123@email.com
+
 password
 adminspn123

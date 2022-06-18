@@ -29,9 +29,31 @@ const upload = multer({
 
 const getAllData = async (req, res) => {
     try {
-        const tables = await Tables.findAll({ include: CategoryTables });
-        res.json(tables);
-        console.log(JSON.stringify(tables, null, 2));
+        const pageAsNumber = Number.parseInt(req.query.page)
+        const sizeAsNumber = Number.parseInt(req.query.size)
+
+        let page = 0
+        if(!Number.isNaN(pageAsNumber) && pageAsNumber > 0) {
+            page = pageAsNumber
+        }
+
+        // const nextPage = pageAsNumber + 1
+        // const prevPage = pageAsNumber - 1
+
+        let size = 5
+        if(!Number.isNaN(sizeAsNumber) && !(sizeAsNumber > 5) && !(sizeAsNumber < 1)) {
+            size = sizeAsNumber
+        }
+
+        const tables = await Tables.findAndCountAll({ 
+            limit: size,
+            offset: page * size
+         });
+        res.json({
+            content: tables.rows,
+            totalPages: Math.ceil(tables.count / size)
+        });
+        // console.log(JSON.stringify(tables, null, 2));
     } catch (error) {
         res.json({ message: error.message });
     }  
@@ -39,7 +61,7 @@ const getAllData = async (req, res) => {
 
 const getDataById = async (req, res) => {
   try {
-      const tables = await Tables.findAll({
+      const tables = await Tables.findAndCountAll({
           where: {
               id: req.params.id
           }
